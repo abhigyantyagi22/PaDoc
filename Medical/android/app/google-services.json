@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "740679773380",
+    "project_id": "dti-ii",
+    "storage_bucket": "dti-ii.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:740679773380:android:2ff5df321648d6ac4ead91",
+        "android_client_info": {
+          "package_name": "com.example.medical"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBUdourdn0WlUEQgD31eP6wSgOifV-W79E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
