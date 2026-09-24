@@ -432,6 +432,31 @@ function Overview({
         </div>
         <img src="/assets/images/img_welcome.png" alt="Care illustration" />
       </div>
+      <section className="content-section">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">Quick access</p>
+            <h2>What would you like to do?</h2>
+          </div>
+        </div>
+        <div className="action-grid">
+          <button onClick={() => setView("discover")}>
+            <span>＋</span>
+            <strong>Favourite Doctors</strong>
+            <small>Keep the specialists you want to revisit</small>
+          </button>
+          <button onClick={() => protectedView("appointments")}>
+            <span>□</span>
+            <strong>View appointment</strong>
+            <small>{user ? "See what is coming up" : "Sign in when you are ready"}</small>
+          </button>
+          <button onClick={() => setView("pharmacy")}>
+            <span>＋</span>
+            <strong>Pharmacy</strong>
+            <small>Browse everyday medicines and care essentials</small>
+          </button>
+        </div>
+      </section>
       <div className="stats">
         <article>
           <span className="stat-icon green">✦</span>
@@ -455,35 +480,6 @@ function Overview({
           </div>
         </article>
       </div>
-      <section className="content-section">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">Quick access</p>
-            <h2>What would you like to do?</h2>
-          </div>
-        </div>
-        <div className="action-grid">
-          <button onClick={() => setView("discover")}>
-            <span>＋</span>
-            <strong>Explore doctors</strong>
-            <small>Compare specialties and profiles</small>
-          </button>
-          <button onClick={() => setView("pharmacy")}>
-            <span>＋</span>
-            <strong>Pharmacy</strong>
-            <small>Browse everyday medicines and care essentials</small>
-          </button>
-          <button onClick={() => protectedView("appointments")}>
-            <span>□</span>
-            <strong>
-              {user ? "View appointments" : "Book an appointment"}
-            </strong>
-            <small>
-              {user ? "See what is coming up" : "Sign in when you are ready"}
-            </small>
-          </button>
-        </div>
-      </section>
     </>
   );
 }
