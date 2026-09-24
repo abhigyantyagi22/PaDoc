@@ -24,7 +24,8 @@ migrate_working_dir/
 # Node/Vite related
 node_modules/
 dist/
-.env
+.env*
+!.env.example
 
 # Symbolication related
 app.*.symbols
