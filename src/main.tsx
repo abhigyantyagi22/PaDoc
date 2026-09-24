@@ -26,7 +26,13 @@ import "./pharmacy.css";
 import { additionalMedicines } from "./additionalMedicines";
 
 type Role = "user" | "doctor";
-type View = "overview" | "discover" | "appointments" | "pharmacy" | "settings";
+type View =
+  | "overview"
+  | "discover"
+  | "appointments"
+  | "pharmacy"
+  | "healthChat"
+  | "settings";
 type Doctor = {
   id: string;
   uid?: string;
@@ -281,6 +287,7 @@ function Sidebar({
           ["overview", "Overview", "⌂"],
           ["appointments", "Patients", "□"],
           ["pharmacy", "Pharmacy", "＋"],
+          ["healthChat", "Chat with AI", "✦"],
           ["settings", "Settings", "⚙"],
         ]
       : [
@@ -288,6 +295,7 @@ function Sidebar({
           ["discover", "Find a doctor", "＋"],
           ["appointments", "Appointments", "□"],
           ["pharmacy", "Pharmacy", "＋"],
+          ["healthChat", "Chat with AI", "✦"],
           ["settings", "Settings", "⚙"],
         ];
   return (
@@ -317,7 +325,8 @@ function Sidebar({
               user ||
               key === "overview" ||
               key === "discover" ||
-              key === "pharmacy"
+              key === "pharmacy" ||
+              key === "healthChat"
                 ? setView(key)
                 : onRequireAuth()
             }
@@ -458,6 +467,11 @@ function Overview({
             <span>＋</span>
             <strong>Explore doctors</strong>
             <small>Compare specialties and profiles</small>
+          </button>
+          <button onClick={() => setView("pharmacy")}>
+            <span>＋</span>
+            <strong>Pharmacy</strong>
+            <small>Browse everyday medicines and care essentials</small>
           </button>
           <button onClick={() => protectedView("appointments")}>
             <span>□</span>
@@ -614,6 +628,94 @@ function Settings({ onSignOut }: { onSignOut: () => void }) {
   );
 }
 
+type ChatMessage = { id: number; role: "assistant" | "user"; text: string };
+
+function createHealthReply(question: string) {
+  const normalizedQuestion = question.toLowerCase();
+  if (
+    /(chest pain|can't breathe|cannot breathe|severe bleeding|stroke|unconscious)/.test(
+      normalizedQuestion,
+    )
+  ) {
+    return "This may be an emergency. Call your local emergency number now or go to the nearest emergency department. Do not wait for an online response.";
+  }
+  if (/(fever|temperature)/.test(normalizedQuestion)) {
+    return "For a fever, rest, drink fluids, and monitor your temperature. Seek medical advice urgently if it is very high, lasts several days, or affects a baby, older adult, or someone with a serious condition.";
+  }
+  if (/(headache|migraine)/.test(normalizedQuestion)) {
+    return "For a mild headache, rest somewhere quiet, drink water, and follow the package directions for any medicine you already know is safe for you. Get medical advice for a sudden, severe, or unusual headache.";
+  }
+  if (/(medicine|medication|tablet|drug)/.test(normalizedQuestion)) {
+    return "I can share general information, but I cannot check your full medical history or prescribe medicine. Read the label and ask a pharmacist before starting or combining medicines.";
+  }
+  return "I can offer general health information and help you decide what to ask a clinician. Tell me your main symptom, how long it has lasted, and whether it is getting worse. I cannot diagnose or replace a doctor.";
+}
+
+function HealthChat() {
+  const [question, setQuestion] = useState("");
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    {
+      id: 1,
+      role: "assistant",
+      text: "Hi, I can help with general health information. What would you like to ask?",
+    },
+  ]);
+  const submitQuestion = (event: React.FormEvent) => {
+    event.preventDefault();
+    const trimmedQuestion = question.trim().slice(0, 500);
+    if (!trimmedQuestion) return;
+    const messageId = Date.now();
+    setMessages((currentMessages) => [
+      ...currentMessages,
+      { id: messageId, role: "user", text: trimmedQuestion },
+      {
+        id: messageId + 1,
+        role: "assistant",
+        text: createHealthReply(trimmedQuestion),
+      },
+    ]);
+    setQuestion("");
+  };
+  return (
+    <section className="content-section health-chat">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">PaDoc health assistant</p>
+          <h2>Ask a health question</h2>
+          <p className="pharmacy-intro">
+            Get general guidance while you decide whether to speak with a doctor or pharmacist.
+          </p>
+        </div>
+      </div>
+      <div className="chat-disclaimer">
+        This assistant does not diagnose, prescribe, or replace professional medical care. Do not share passwords or private medical records.
+      </div>
+      <div className="chat-window" aria-live="polite">
+        {messages.map((message) => (
+          <div className={`chat-message ${message.role}`} key={message.id}>
+            <span>{message.role === "assistant" ? "AI" : "You"}</span>
+            <p>{message.text}</p>
+          </div>
+        ))}
+      </div>
+      <form className="chat-form" onSubmit={submitQuestion}>
+        <label htmlFor="health-question">Your question</label>
+        <div>
+          <input
+            id="health-question"
+            value={question}
+            maxLength={500}
+            onChange={(event) => setQuestion(event.target.value)}
+            placeholder="Example: What should I do for a mild headache?"
+          />
+          <Button type="submit">Ask</Button>
+        </div>
+        <small>{question.length}/500 characters</small>
+      </form>
+    </section>
+  );
+}
+
 function Dashboard({
   user,
   role,
@@ -635,6 +737,8 @@ function Dashboard({
           ? "Appointments"
           : view === "pharmacy"
             ? "Pharmacy"
+            : view === "healthChat"
+              ? "Chat with AI"
             : "Settings";
   const navigate = (nextView: View) => {
     if (!user && (nextView === "appointments" || nextView === "settings"))
@@ -681,6 +785,7 @@ function Dashboard({
         {view === "pharmacy" && (
           <Pharmacy user={user} onRequireAuth={onRequireAuth} />
         )}
+        {view === "healthChat" && <HealthChat />}
         {view === "settings" && user && <Settings onSignOut={onSignOut!} />}
       </main>
     </div>
